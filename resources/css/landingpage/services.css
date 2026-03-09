@@ -1,0 +1,237 @@
+.services-section {
+    padding: 100px 15px;
+    background-color: #f8f9fa;
+}
+
+.services-subtitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.services-heading {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1E3A8A;
+}
+
+.service-card {
+    position: relative;
+    height: 350px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-end;
+    transition: transform 0.4s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-8px);
+}
+
+.service-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.8) 0%,
+            rgba(0, 0, 0, 0.5) 40%,
+            rgba(0, 0, 0, 0.2) 70%,
+            rgba(0, 0, 0, 0) 100%);
+    z-index: 1;
+}
+
+.service-content {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    z-index: 2;
+    padding: 20px;
+    width: 85%;
+    max-height: 160px;
+    color: #fff;
+    transform: translateX(-50%) translateY(0);
+    transition: all 0.5s ease;
+    border-radius: 8px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.service-card:hover .service-content {
+    top: 50%;
+    bottom: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    max-height: 180px;
+    padding: 25px;
+    background: #ffffff;
+    border: 2px solid #1E3A8A;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    color: #1E3A8A;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.service-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    transition: color 0.4s ease;
+}
+
+.service-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.service-card:hover .service-description {
+    opacity: 1;
+    color: #555;
+}
+
+.service-card:hover .service-title {
+    color: #1E3A8A;
+}
+
+.service-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    display: block;
+    opacity: 0;
+    transition: color 0.4s ease;
+}
+
+.service-card:hover .service-icon {
+    opacity: 1;
+    color: #1E3A8A;
+}
+
+@media (max-width: 1200px) {
+    .service-title {
+        font-size: 1.25rem;
+    }
+
+    .service-description {
+        font-size: 0.9rem;
+    }
+
+    .service-card:hover .service-title {
+        font-size: 1.25rem;
+    }
+
+    .service-card:hover .service-description {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .service-card {
+        height: 300px;
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .service-title {
+        font-size: 1.2rem;
+    }
+
+    .service-description {
+        font-size: 0.85rem;
+    }
+
+    .service-card:hover .service-title {
+        font-size: 1rem;
+    }
+
+    .service-card:hover .service-description {
+        font-size: 0.85rem;
+    }
+
+    .service-content {
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .service-card:hover .service-content {
+        transform: translate(-50%, -50%);
+    }
+}
+
+@media (max-width: 768px) {
+    .services-heading {
+        font-size: 2rem;
+    }
+
+    .service-card {
+        height: 260px;
+    }
+
+    .service-content {
+        transform: translateY(30px);
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .service-title {
+        font-size: 1.1rem;
+    }
+
+    .service-description {
+        font-size: 0.8rem;
+    }
+
+    .service-card:hover .service-title {
+        font-size: 1.1rem;
+    }
+
+    .service-card:hover .service-description {
+        font-size: 0.8rem;
+    }
+
+    .service-content {
+        padding: 15px;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .service-card:hover .service-content {
+        padding: 20px;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@media (max-width: 576px) {
+    .service-title {
+        font-size: 1rem;
+    }
+
+    .service-description {
+        font-size: 0.75rem;
+    }
+
+    .service-card:hover .service-title {
+        font-size: 1rem;
+    }
+
+    .service-card:hover .service-description {
+        font-size: 0.75rem;
+    }
+}

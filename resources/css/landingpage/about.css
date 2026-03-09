@@ -1,0 +1,160 @@
+.aboutus-section {
+    position: relative;
+    width: 100%;
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+
+.aboutus-section .container {
+    padding: 80px 15px;
+}
+
+.aboutus-images {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.large-img {
+    width: 350px;
+    height: 400px;
+    border-radius: none;
+    object-fit: cover;
+}
+
+.small-img {
+    position: absolute;
+    width: 60%;
+    height: 250px;
+    bottom: -10px;
+    right: 0;
+    transform: translateX(20%);
+    object-fit: cover;
+    border: 0.8rem solid white;
+}
+
+.aboutus-text .short-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.aboutus-text-border {
+    border-left: 5px solid #1E3A8A;
+    padding-left: 1.5rem;
+    display: inline-block;
+    margin-bottom: 4rem;
+}
+
+.aboutus-heading {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.aboutus-description {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+.aboutus-features {
+    width: 100%;
+    padding-top: 1.5rem;
+}
+
+.feature-item {
+    padding: 0 10px;
+    border: 1px solid #1E3A8A;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.feature-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #1E3A8A;
+    gap: 8px;
+}
+
+.feature-icon {
+    font-size: 22px;
+    color: #0066cc;
+}
+
+@media (max-width: 992px) {
+    .aboutus-images {
+        margin-bottom: 2rem;
+    }
+
+    .small-img {
+        width: 50%;
+        right: 5%;
+    }
+}
+
+@media (max-width: 768px) {
+    .aboutus-section .container {
+        padding: 50px 15px;
+    }
+
+    .aboutus-images {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .large-img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .small-img {
+        position: relative;
+        width: 70%;
+        max-width: 220px;
+        height: auto;
+        bottom: auto;
+        right: auto;
+        margin-top: -60px;
+    }
+
+    .aboutus-heading {
+        font-size: 1.5rem;
+    }
+
+    .aboutus-description {
+        font-size: 0.95rem;
+    }
+
+    .feature-item {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .aboutus-heading {
+        font-size: 1.3rem;
+    }
+
+    .aboutus-text-border {
+        margin-bottom: 2rem;
+        padding-left: 1rem;
+    }
+
+    .feature-title {
+        font-size: 0.9rem;
+    }
+
+    .feature-icon {
+        font-size: 18px;
+    }
+}

@@ -1,0 +1,97 @@
+body {
+    background: #f5f7fb;
+}
+
+/* Header */
+.topbar {
+    background: #2563eb;
+}
+
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .nav-item {
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #374151;
+}
+
+.sidebar .nav-item.active,
+.sidebar .nav-item:hover {
+    background: #e8f0fe;
+    color: #2563eb;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Top bar */
+.topbar {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Cards */
+.stat-card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.icon-box {
+    font-size: 28px;
+    opacity: 0.7;
+}
+
+/* Activities */
+.activity {
+    padding: 10px 0;
+    border-left: 3px solid #2563eb;
+    padding-left: 12px;
+    margin-bottom: 15px;
+}
+
+/* Quick action buttons */
+.btn-light {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+
+.dropdown-panel {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: #fff;
+    color: #333;
+    width: 220px;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+.dropdown-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-panel li {
+    padding: 6px 0;
+    cursor: pointer;
+}
+
+.dropdown-panel li:hover {
+    color: #0d3b66;
+}

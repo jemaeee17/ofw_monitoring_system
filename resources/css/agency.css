@@ -1,0 +1,859 @@
+:root {
+    --ph-blue: #0038A8;
+    --ph-red: #CE1126;
+    --ph-yellow: #FCD116;
+    --ph-green: #004d00;
+    --sidebar-bg: #0f172a;
+    --main-bg: #f1f5f9;
+}
+
+/* Layout Framework */
+.admin-wrapper {
+    background-color: var(--main-bg);
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar-ph {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.main-content-ph {
+    height: 100vh;
+}
+
+.scroll-area-ph {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Sidebar UI */
+.sidebar-brand-ph {
+    padding: 30px 20px;
+}
+
+.flag-accent {
+    width: 40px;
+    height: 4px;
+    background: linear-gradient(to right, var(--ph-blue) 50%, var(--ph-red) 50%);
+    margin-bottom: 10px;
+}
+
+.logo-text-ph {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+}
+
+.ksa-tag {
+    color: var(--ph-yellow);
+    font-size: 0.8rem;
+}
+
+.nav-list-ph {
+    padding: 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-section-label {
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin: 15px 0 10px 15px;
+    text-transform: uppercase;
+}
+
+.nav-item-ph {
+    width: calc(100% - 20px);
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin: 2px 10px;
+    transition: 0.2s;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-item-ph:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.nav-item-ph.active {
+    background: var(--ph-blue);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 56, 168, 0.2);
+}
+
+/* Dashboard Grid Fix */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.stat-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    border-left: 5px solid transparent;
+}
+
+.blue-border {
+    border-left-color: var(--ph-blue);
+}
+
+.red-border {
+    border-left-color: var(--ph-red);
+}
+
+.yellow-border {
+    border-left-color: var(--ph-yellow);
+}
+
+.green-border {
+    border-left-color: var(--ph-green);
+}
+
+.stat-info h2 {
+    margin: 0;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: #1e293b;
+}
+
+.stat-info small {
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.bg-light-blue {
+    background: rgba(0, 56, 168, 0.1);
+}
+
+.bg-light-yellow {
+    background: rgba(252, 209, 22, 0.1);
+}
+
+.bg-light-red {
+    background: rgba(206, 17, 38, 0.1);
+}
+
+/* Header & Cards */
+.header-ph {
+    height: 70px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.avatar-ph {
+    width: 38px;
+    height: 38px;
+    background: var(--ph-blue);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.modern-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+}
+
+.card-header-ph {
+    padding: 15px 20px;
+    font-weight: 700;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+}
+
+.activity-item-new {
+    display: flex;
+    align-items: center;
+    padding: 5px 20px;
+    gap: 15px;
+    transition: 0.2s;
+}
+
+.activity-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.activity-icon.blue {
+    background: #e0e7ff;
+}
+
+.activity-icon.yellow {
+    background: #fef9c3;
+}
+
+.clock-card-ph {
+    background: linear-gradient(135deg, var(--ph-blue) 0%, #002673 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.badge-ph-blue {
+    background: var(--ph-blue);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Adaptability */
+@media (max-width: 1100px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar-ph {
+        width: 70px;
+    }
+
+    .logo-text-ph,
+    .nav-item-ph span:last-child {
+        display: none;
+    }
+}
+
+/* PHILIPPINE FLAG THEME COLORS */
+:root {
+    --ph-blue: #0038A8;
+    /* Royal Blue */
+    --ph-red: #CE1126;
+    /* Scarlet Red */
+    --ph-yellow: #FCD116;
+    /* Golden Yellow */
+    --ph-bg: #f4f7fe;
+}
+
+/* Header Card Styling */
+.applicants-header-card {
+    background: linear-gradient(135deg, var(--ph-blue) 0%, #002673 100%);
+    color: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 56, 168, 0.2);
+}
+
+.applicants-header-card::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: var(--ph-yellow);
+    opacity: 0.1;
+    border-radius: 50%;
+}
+
+/* Button Styling */
+.btn-ph-red {
+    background-color: var(--ph-red);
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: 0.3s;
+}
+
+.btn-ph-red:hover {
+    background-color: #a00d1d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-ph-blue-outline {
+    border: 2px solid var(--ph-blue);
+    color: var(--ph-blue);
+    background: white;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 10px 20px;
+}
+
+.btn-ph-blue-outline:hover {
+    background: var(--ph-blue);
+    color: white;
+}
+
+/* Table Styling */
+.table-ph-blue {
+    background-color: var(--ph-blue) !important;
+    color: white !important;
+}
+
+.table-ph-blue th {
+    padding: 15px !important;
+    font-weight: 500;
+    border: none;
+}
+
+.action-btn-ph {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin: 0 2px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.action-btn-ph:hover {
+    background: var(--ph-yellow);
+    border-color: var(--ph-yellow);
+}
+
+/* Search Group */
+.search-group-ph {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    color: #94a3b8;
+}
+
+.search-group-ph input {
+    padding-left: 45px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    height: 45px;
+}
+
+.search-group-ph input:focus {
+    border-color: var(--ph-blue);
+    box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.1);
+}
+
+/* Modal Overlay */
+.modal-overlay-ph {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.6);
+    /* Dark navy tint */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+/* Modal Box */
+.application-modal {
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.modal-header-ph {
+    background: var(--ph-blue);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title-ph {
+    color: var(--ph-blue);
+    border-bottom: 2px solid var(--ph-yellow);
+    display: inline-block;
+    padding-bottom: 3px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.upload-area-ph {
+    border: 2px dashed #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-area-ph:hover {
+    border-color: var(--ph-blue);
+    background: #f1f5f9;
+}
+
+/* Animations */
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom Philippine Theme Colors */
+:root {
+    --ph-blue: #0038A8;
+    --ph-red: #CE1126;
+    --ph-yellow: #FCD116;
+}
+
+/* Modal and Form Container */
+.application-container-box {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Red Section Header Tab */
+.form-section-header-red {
+    background-color: var(--ph-red);
+    color: white;
+    padding: 8px 30px;
+    font-weight: bold;
+    display: inline-block;
+    border-radius: 0 0 15px 0;
+    margin-bottom: 10px;
+    width: 60%;
+    /* Adjust based on image */
+}
+
+/* Form Inputs to match image style */
+.form-control-ph,
+.form-select-ph {
+    background-color: #f1f1f1 !important;
+    border: 1px solid #d1d1d1 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #555;
+}
+
+.form-label-ph {
+    font-weight: 700;
+    color: #444;
+    font-size: 13px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Gold Generate Button */
+.btn-gold-ph {
+    background-color: var(--ph-yellow);
+    border: 1px solid #d4af37;
+    color: #5a4a00;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-gold-ph:hover {
+    background-color: #e6bd12;
+}
+
+/* Modal Specifics */
+.ph-logo-circle {
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.scroll-form {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Success/Save Button Override */
+.btn-success {
+    background-color: #198754 !important;
+    border: none;
+    border-radius: 4px;
+}
+
+/* adminDashboard.css */
+
+/* --- Layout Wrappers --- */
+.admin-wrapper {
+    background-color: #f8f9fa;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.sidebar-ph {
+    width: 260px;
+    background: #1a1c1e;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.main-content-ph {
+    background: #f4f6f9;
+}
+
+.header-ph {
+    height: 70px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* --- Navigation --- */
+.nav-item-ph {
+    width: 100%;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: #a0a0a0;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+}
+
+.nav-item-ph:hover,
+.nav-item-ph.active {
+    background: #2d2f31;
+    color: #ffffff;
+}
+
+.nav-item-ph.active {
+    border-left: 4px solid #0d6efd;
+}
+
+/* --- Cards & Stats --- */
+.modern-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.blue-border {
+    border-bottom: 4px solid #0d6efd;
+}
+
+.yellow-border {
+    border-bottom: 4px solid #ffc107;
+}
+
+.red-border {
+    border-bottom: 4px solid #dc3545;
+}
+
+.green-border {
+    border-bottom: 4px solid #00ff00;
+}
+
+/* --- Table Styles --- */
+.table-ph-blue {
+    background: #f1f4f9;
+}
+
+.table-ph-blue th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+    padding: 15px;
+    border: none;
+}
+
+.action-btn-ph {
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+/* --- Application Modal --- */
+.modal-overlay-ph {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.application-modal {
+    background: #fdfdfd;
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-body-ph {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.form-section-header-red {
+    background: #c1272d;
+    /* Philippine Red */
+    border-radius: 4px 4px 0 0;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.form-label-ph {
+    font-size: 11px;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.form-control-ph,
+.form-select-ph {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-control-ph:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+/* --- Buttons --- */
+.btn-ph-red {
+    background-color: #c1272d;
+    color: white;
+    font-weight: 600;
+    border: none;
+}
+
+.btn-ph-blue-outline {
+    border: 1px solid #0038a8;
+    color: #0038a8;
+    font-weight: 600;
+}
+
+.btn-gold-ph {
+    background: #ceac5d;
+    color: white;
+    border: none;
+}
+
+/* --- Animations --- */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Custom Scrollbar for the form */
+.scroll-form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scroll-form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.scroll-form::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.success-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 20px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    font-weight: bold;
+    text-align: center;
+    min-width: 200px;
+    animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+}
+
+.activity-details p {
+    font-size: 14px;
+}
+
+.activity-details small,
+.activity-time small {
+    font-size: 12px;
+}
