@@ -27,12 +27,13 @@ const AppointmentBooking = () => {
         status: "",
         business_type: "",
         schedule_date: "",
-        schedule_time: ""
+        schedule_time: "",
+        agency_id: "",
     });
 
     const handleConfirm = async () => {
-
         const user = JSON.parse(localStorage.getItem("ofw"));
+        const token = localStorage.getItem("ofw_token");
 
         if (
             !formData.name ||
@@ -44,14 +45,18 @@ const AppointmentBooking = () => {
             !formData.status ||
             !formData.business_type ||
             !formData.schedule_date ||
-            !formData.schedule_time
+            !formData.schedule_time ||
+            !formData.agency_id // make sure agency is selected
         ) {
             alert("Please fill all required fields!");
             return;
         }
+
         try {
-            const res = await axios.post("/api/appointments", {
+            // Save the appointment
+            await axios.post("/api/appointments", {
                 ofw_id: user.id,
+                agency_id: parseInt(formData.agency_id),
                 name: formData.name,
                 email: formData.email,
                 address: formData.address,
@@ -62,8 +67,11 @@ const AppointmentBooking = () => {
                 business_type: formData.business_type,
                 schedule_date: formData.schedule_date,
                 schedule_time: formData.schedule_time
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
+            // Show success modal immediately
             setShowSuccessModal(true);
 
         } catch (error) {

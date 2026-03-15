@@ -63,7 +63,7 @@ export default function EmergencyPanel({ onComplaint, onUrgent, onBack, userEmai
 
     return (
         <div className="card shadow-lg border-0 p-4" style={{ width: "100%", maxWidth: "420px", borderRadius: "16px" }}>
-            <h4 className="fw-bold text-center mb-3">OFW Tabang Services</h4>
+            <h4 className="fw-bold text-center mb-3">OFW Emergency and Support Services</h4>
 
             {!isVerified && (
                 <>

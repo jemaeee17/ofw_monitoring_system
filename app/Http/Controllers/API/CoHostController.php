@@ -8,21 +8,23 @@ use App\Models\CoHost;
 
 class CoHostController extends Controller
 {
-    // Fetch all co-hosts
     public function index()
     {
-        $coHosts = CoHost::all();
+        $userId = auth()->id();
+        logger("Logged in user ID: {$userId}");
+
+        $coHosts = CoHost::where('agency_id', auth()->id())->get();
         return response()->json($coHosts);
     }
 
-    // Fetch single co-host
     public function show($id)
     {
-        $coHost = CoHost::findOrFail($id);
+        $coHost = CoHost::where('id', $id)
+            ->where('agency_id', auth()->id())
+            ->firstOrFail();
         return response()->json($coHost);
     }
 
-    // Create new co-host
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -30,6 +32,8 @@ class CoHostController extends Controller
             'location' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:255',
         ]);
+
+        $data['agency_id'] = auth()->id();
 
         $coHost = CoHost::create($data);
 
@@ -39,10 +43,11 @@ class CoHostController extends Controller
         ]);
     }
 
-    // Update co-host
     public function update(Request $request, $id)
     {
-        $coHost = CoHost::findOrFail($id);
+        $coHost = CoHost::where('id', $id)
+            ->where('agency_id', auth()->id())
+            ->firstOrFail();
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -58,12 +63,19 @@ class CoHostController extends Controller
         ]);
     }
 
-    // Delete co-host
     public function destroy($id)
     {
-        $coHost = CoHost::findOrFail($id);
+        $coHost = CoHost::where('id', $id)
+            ->where('agency_id', auth()->id())
+            ->firstOrFail();
+
         $coHost->delete();
 
         return response()->json(['message' => 'Co-host deleted successfully']);
+    }
+
+    public function publicIndex()
+    {
+        return CoHost::select('id', 'name')->orderBy('name')->get();
     }
 }

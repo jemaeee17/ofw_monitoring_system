@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
+import axios from 'axios';
 
 const EmployedModal = ({ selectedWorker, onClose, onUpdate }) => {
     const [activeTab, setActiveTab] = useState('Documents');
 
-    // State for documents and flights
     const [workerDocuments, setWorkerDocuments] = useState(selectedWorker.documents || []);
     const [workerFlights, setWorkerFlights] = useState(selectedWorker.flights || []);
 
@@ -13,7 +13,6 @@ const EmployedModal = ({ selectedWorker, onClose, onUpdate }) => {
     const fileInputRef = useRef(null);
     const flightFileInputRef = useRef(null);
 
-    // Handle file selection
     const handleDocumentChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -22,8 +21,8 @@ const EmployedModal = ({ selectedWorker, onClose, onUpdate }) => {
             const updatedDocs = [...workerDocuments];
             updatedDocs[editingDocIndex] = {
                 ...updatedDocs[editingDocIndex],
-                file_path: file.name, // update table display
-                newFile: file,        // keep actual file for API
+                file_path: file.name,
+                newFile: file,
             };
             setWorkerDocuments(updatedDocs);
             setEditingDocIndex(null);
@@ -71,36 +70,21 @@ const EmployedModal = ({ selectedWorker, onClose, onUpdate }) => {
         });
 
         try {
-            const response = await fetch(
-                "http://127.0.0.1:8000/api/update-registry",
-                {
-                    method: "POST",
-                    body: formData,
-                }
+            const { data } = await axios.post(
+                "/api/update-registry",
+                formData,
+                { withCredentials: true }
             );
 
-            const data = await response.json();
 
-            if (response.ok) {
+            if (data.documents) setWorkerDocuments(data.documents);
+            if (data.flights) setWorkerFlights(data.flights);
 
-                // refresh documents
-                if (data.documents) {
-                    setWorkerDocuments(data.documents);
-                }
-
-                // refresh flights
-                if (data.flights) {
-                    setWorkerFlights(data.flights);
-                }
-
-                alert("Registry updated successfully!");
-
-            } else {
-                alert(data.message || "Update failed.");
-            }
+            alert("Registry updated successfully!");
 
         } catch (error) {
             console.error(error);
+            alert(error.response?.data?.message || "Update failed");
         }
     };
 
@@ -121,7 +105,6 @@ const EmployedModal = ({ selectedWorker, onClose, onUpdate }) => {
                 backdropFilter: 'blur(5px)'
             }}
         >
-            {/* Hidden file inputs */}
             <input
                 type="file"
                 ref={fileInputRef}
@@ -198,7 +181,8 @@ const EmployedModal = ({ selectedWorker, onClose, onUpdate }) => {
                                                 <tr key={doc.id}>
                                                     <td>{index + 1}</td>
                                                     <td className="text-primary fw-semibold">
-                                                        {doc.file_name || doc.file_path.split('/').pop()}
+                                                        {doc.newFile ? doc.newFile.name : doc.file_name || doc.file_path.split('/').pop()}
+                                                        {doc.newFile && <span className="badge bg-warning ms-2">Pending</span>}
                                                     </td>
                                                     <td>{new Date(doc.created_at).toLocaleDateString()}</td>
                                                     <td className="d-flex justify-content-center gap-1">

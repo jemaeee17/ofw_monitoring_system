@@ -37,7 +37,14 @@ const EmployedTable = ({ workers, onOpenWorker, setWorkers, setAllWorkers }) => 
         if (!worker) return;
 
         try {
-            await axios.post(`/api/applications/${worker.id}/set-deployed`);
+            await axios.post(`/api/applications/${worker.id}/set-deployed`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
+            });
             alert(`${worker.full_name} is now Deployed!`);
             setWorkers(prev => prev.filter(w => w.id !== worker.id));
             setAllWorkers(prev => prev.map(w =>

@@ -15,13 +15,15 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:6',
+            'agency_id' => 'required'
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'ofw', 
+            'role' => 'ofw',
+            'agency_id' => $request->agency_id
         ]);
 
         return response()->json([

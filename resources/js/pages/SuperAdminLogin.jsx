@@ -17,14 +17,15 @@ export default function SuperAdminLogin() {
         setLoading(true);
 
         try {
-            // Update API endpoint for SuperAdmin login
             const response = await axios.post(
                 'http://127.0.0.1:8000/api/admin/login',
                 { email, password }
             );
-
-            // Store SuperAdmin user in localStorage
             localStorage.setItem('superadmin', JSON.stringify(response.data.user));
+            localStorage.setItem(
+                'token',
+                response.data.token
+            );
             setShowSuccessModal(true);
 
         } catch (err) {

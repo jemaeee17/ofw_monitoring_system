@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\Notification;
+use App\Models\Message;
 use Carbon\Carbon;
 
 class AppointmentController extends Controller
@@ -14,6 +15,7 @@ class AppointmentController extends Controller
     {
         $validated = $request->validate([
             'ofw_id' => 'required|integer',
+            'agency_id' => 'required|integer',
             'name' => 'required|string',
             'email' => 'required|email',
             'address' => 'required|string',
@@ -28,26 +30,44 @@ class AppointmentController extends Controller
 
         $appointment = Appointment::create($validated);
 
-        Notification::create([
-            'user_id' => $validated['ofw_id'],
-            'type' => 'user_appointment',
-            'message' => "Your appointment is scheduled on "
-                . $validated['schedule_date']
-                . " at "
-                . $validated['schedule_time']
-                . ". Please arrive 15 minutes early.",
-            'is_read' => false
-        ]);
-
-        Notification::create([
+        $agencyNotification = Notification::create([
             'user_id' => null,
+            'agency_id' => $validated['agency_id'],
             'type' => 'agency_appointment',
             'message' => $validated['name']
                 . " booked an appointment on "
                 . $validated['schedule_date']
                 . " at "
                 . $validated['schedule_time'],
-            'is_read' => false
+            'is_read' => false,
+        ]);
+
+        $conversationId = $agencyNotification->id;
+
+        $ofwMessage = "Your appointment is scheduled on "
+            . $validated['schedule_date']
+            . " at "
+            . $validated['schedule_time']
+            . ". Please arrive 15 minutes early.";
+
+        Notification::create([
+            'user_id' => $validated['ofw_id'],
+            'agency_id' => $validated['agency_id'],
+            'type' => 'user_appointment',
+            'message' => $ofwMessage,
+            'conversation_id' => $conversationId,
+            'is_read' => false,
+        ]);
+
+        $agencyNotification->conversation_id = $conversationId;
+        $agencyNotification->save();
+
+        Message::create([
+            'conversation_id' => $conversationId,
+            'agency_id' => $validated['agency_id'],
+            'ofw_id' => $validated['ofw_id'],
+            'sender' => 'agency',
+            'message' => $ofwMessage,
         ]);
 
         return response()->json([
@@ -58,29 +78,50 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        return Appointment::all();
+        $agencyId = auth()->id();
+        $appointments = Appointment::where('agency_id', $agencyId)->get();
+
+        return response()->json($appointments);
     }
 
-    public function fullyBookedDates()
+    public function fullyBookedDates(Request $request)
     {
-        return Appointment::select('schedule_date')
+        $agencyId = $request->query('agency_id');
+
+        if (!$agencyId) {
+            return response()->json([], 400);
+        }
+
+        return Appointment::where('agency_id', $agencyId)
+            ->select('schedule_date')
             ->groupBy('schedule_date')
             ->havingRaw('COUNT(schedule_time) >= 8')
             ->get();
     }
 
-    public function bookedTimes($date)
+    public function bookedTimes(Request $request, $date)
     {
-        $times = Appointment::where('schedule_date', $date)
+
+        $agencyId = $request->query('agency_id', auth()->id());
+
+        $times = Appointment::where('agency_id', $agencyId)
+            ->where('schedule_date', $date)
             ->pluck('schedule_time');
 
         return response()->json($times);
     }
 
+
     public function updateAppointmentStatus(Request $request, $id)
     {
-        $appointment = Appointment::findOrFail($id);
+        $agencyId = auth()->id();
+
+        $appointment = Appointment::where('id', $id)
+            ->where('agency_id', $agencyId)
+            ->firstOrFail();
+
         $status = $request->input('status');
+
         if (!in_array($status, ['done', 'missed'])) {
             return response()->json(['message' => 'Invalid status'], 400);
         }
@@ -93,12 +134,13 @@ class AppointmentController extends Controller
 
     public function monthlyAppointments()
     {
-        $count = Appointment::whereMonth('schedule_date', Carbon::now()->month)
+        $agencyId = auth()->id();
+
+        $count = Appointment::where('agency_id', $agencyId)
+            ->whereMonth('schedule_date', Carbon::now()->month)
             ->whereYear('schedule_date', Carbon::now()->year)
             ->count();
 
-        return response()->json([
-            'monthlyAppointments' => $count
-        ]);
+        return response()->json(['monthlyAppointments' => $count]);
     }
 }

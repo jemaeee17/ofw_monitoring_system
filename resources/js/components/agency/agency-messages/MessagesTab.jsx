@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 
 const MessagesTab = () => {
@@ -8,71 +8,164 @@ const MessagesTab = () => {
     const [urgent, setUrgent] = useState([]);
     const [normal, setNormal] = useState([]);
 
-    useEffect(() => {
-        if (activeTab === "appointments") {
-            axios.get("/api/messages/agency-appointments")
-                .then(res => setAppointments(res.data))
-                .catch(err => console.error(err));
-        } else if (activeTab === "urgent") {
-            axios.get("/api/messages/urgent")
-                .then(res => setUrgent(res.data))
-                .catch(err => console.error(err));
-        } else if (activeTab === "normal") {
-            axios.get("/api/messages/normal")
-                .then(res => setNormal(res.data))
-                .catch(err => console.error(err));
-        }
-    }, [activeTab]);
+    const [replyText, setReplyText] = useState("");
+    const [chatMessages, setChatMessages] = useState([]);
+    const bottomRef = useRef(null);
 
-    const chats = activeTab === "appointments"
-        ? appointments
-        : activeTab === "urgent"
-            ? urgent
-            : normal;
+    const token = localStorage.getItem("agency_token");
+
+    const sendReply = () => {
+        if (!replyText.trim()) return;
+
+        const token = localStorage.getItem("agency_token");
+
+        axios
+            .post("/api/messages/reply", {
+                conversation_id: selectedChat.conversation_id || selectedChat.id,
+                message: replyText
+            },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+            .then((res) => {
+                setChatMessages((prev) => [...prev, res.data]);
+                setReplyText("");
+            })
+            .catch((err) => console.error(err));
+    };
+
+    const handleSelectChat = (chat) => {
+        setSelectedChat(chat);
+        setChatMessages([]);
+
+        const conversationId = chat.conversation_id || chat.id;
+
+        axios
+            .get(`/api/messages/conversation/${conversationId}`)
+            .then((res) => {
+                setChatMessages(res.data);
+            })
+            .catch((err) => console.error(err));
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem("agency_token");
+
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+    }, []);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatMessages]);
+
+    const fetchAppointments = useCallback(() => {
+        if (!token) return;
+
+        axios
+            .get("/api/messages/agency-appointments")
+            .then((res) => {
+                setAppointments(res.data);
+                if (!selectedChat && res.data.length > 0) {
+                    setSelectedChat(res.data[0]);
+                }
+            })
+            .catch((err) => console.error(err));
+    }, [selectedChat, token]);
+
+    const fetchUrgent = useCallback(() => {
+        if (!token) return;
+        axios
+            .get("/api/messages/urgent")
+            .then((res) => setUrgent(res.data))
+            .catch((err) => console.error(err));
+    }, [token]);
+
+    const fetchNormal = useCallback(() => {
+        if (!token) return;
+        axios
+            .get("/api/messages/normal")
+            .then((res) => setNormal(res.data))
+            .catch((err) => console.error(err));
+    }, [token]);
+
+    useEffect(() => {
+        if (!token) return;
+        if (activeTab === "appointments") fetchAppointments();
+        else if (activeTab === "urgent") fetchUrgent();
+        else if (activeTab === "normal") fetchNormal();
+    }, [activeTab, fetchAppointments, fetchUrgent, fetchNormal, token]);
+
+    const addNewAppointment = (notification) => {
+        setAppointments((prev) => [notification, ...prev]);
+        setSelectedChat(notification);
+    };
+
+    const chats =
+        activeTab === "appointments"
+            ? appointments
+            : activeTab === "urgent"
+                ? urgent
+                : normal;
 
     return (
         <div className="container-fluid">
-
-            {/* TITLE */}
             <h4 className="fw-bold mb-3">Messages</h4>
 
-            {/* TABS */}
             <div className="d-flex gap-2 border-bottom pb-2 mb-3">
                 <button
                     className={`btn ${activeTab === "appointments" ? "btn-primary" : "btn-light"}`}
-                    onClick={() => { setActiveTab("appointments"); setSelectedChat(null); }}
+                    onClick={() => {
+                        setActiveTab("appointments");
+                        setSelectedChat(null);
+                    }}
                 >
                     📅 Appointments
                 </button>
 
                 <button
                     className={`btn ${activeTab === "urgent" ? "btn-danger" : "btn-light"}`}
-                    onClick={() => { setActiveTab("urgent"); setSelectedChat(null); }}
+                    onClick={() => {
+                        setActiveTab("urgent");
+                        setSelectedChat(null);
+                    }}
                 >
                     🚨 Urgent Complaints
                 </button>
 
                 <button
                     className={`btn ${activeTab === "normal" ? "btn-success" : "btn-light"}`}
-                    onClick={() => { setActiveTab("normal"); setSelectedChat(null); }}
+                    onClick={() => {
+                        setActiveTab("normal");
+                        setSelectedChat(null);
+                    }}
                 >
                     💬 Normal Complaints
                 </button>
             </div>
 
-            {/* CHAT LAYOUT */}
             <div className="row">
-
-                {/* LEFT SIDE - CONVERSATIONS */}
                 <div className="col-md-4">
                     <div className="card shadow-sm">
                         <div className="card-header fw-semibold">Conversations</div>
-                        <div className="list-group list-group-flush">
-                            {chats.map(chat => (
+                        <div
+                            className="list-group list-group-flush"
+                            style={{
+                                maxHeight: "500px",
+                                overflowY: "auto"
+                            }}
+                        >
+                            {chats.map((chat) => (
                                 <button
                                     key={chat.id}
-                                    className={`list-group-item list-group-item-action ${selectedChat?.id === chat.id ? "active" : ""}`}
-                                    onClick={() => setSelectedChat(chat)}
+                                    className={`list-group-item list-group-item-action ${(selectedChat?.conversation_id || selectedChat?.id) === (chat.conversation_id || chat.id)
+                                        ? "active"
+                                        : ""
+                                        }`}
+                                    onClick={() => handleSelectChat(chat)}
                                 >
                                     <div className="d-flex justify-content-between">
                                         <strong>
@@ -82,7 +175,9 @@ const MessagesTab = () => {
                                                     ? "Urgent Complaint"
                                                     : "Normal Complaint"}
                                         </strong>
-                                        <small className="text-muted">{new Date(chat.created_at).toLocaleTimeString()}</small>
+                                        <small className="text-muted">
+                                            {new Date(chat.created_at).toLocaleTimeString()}
+                                        </small>
                                     </div>
                                     <div className="small text-muted">{chat.message}</div>
                                 </button>
@@ -91,109 +186,98 @@ const MessagesTab = () => {
                     </div>
                 </div>
 
-                {/* RIGHT SIDE - CHAT WINDOW */}
                 <div className="col-md-8">
                     <div className="card shadow-sm">
 
-                        {/* Card Header */}
                         <div className="card-header fw-semibold">
                             {selectedChat
                                 ? activeTab === "appointments"
-                                    ? selectedChat.name
+                                    ? selectedChat.name || "Appointment"
                                     : activeTab === "urgent"
                                         ? selectedChat.ofw_name
-                                        : selectedChat.details?.ofw_name || "Normal Complaint"
+                                        : selectedChat.ofw_name || "Normal Complaint"
                                 : "Select a conversation"}
                         </div>
 
-                        {/* Card Body */}
                         <div className="card-body" style={{ height: "400px", overflowY: "auto" }}>
-                            {selectedChat ? (
-                                <div>
+                            {chatMessages.length > 0 ? (
+                                <>
+                                    {chatMessages.map((msg) => (
+                                        <div
+                                            key={msg.id}
+                                            className={`mb-2 d-flex ${msg.sender === "agency"
+                                                ? "justify-content-end"
+                                                : "justify-content-start"
+                                                }`}
+                                        >
+                                            <div
+                                                className={`p-2 rounded ${msg.sender === "agency"
+                                                    ? "bg-primary text-white"
+                                                    : "bg-light"
+                                                    }`}
+                                                style={{ maxWidth: "70%" }}
+                                            >
+                                                {msg.message.split("\n").map((line, i) => {
+                                                    const isImage =
+                                                        line.endsWith(".jpg") ||
+                                                        line.endsWith(".jpeg") ||
+                                                        line.endsWith(".png") ||
+                                                        line.endsWith(".webp");
 
-                                    {/* Appointments */}
-                                    {activeTab === "appointments" && (
-                                        <div className="mb-3">
-                                            <div className="bg-light p-2 rounded d-inline-block">{selectedChat.message}</div>
-                                            <div className="small text-muted mt-1">{new Date(selectedChat.created_at).toLocaleString()}</div>
-                                        </div>
-                                    )}
-
-                                    {/* Urgent Complaints */}
-                                    {activeTab === "urgent" && (
-                                        <div className="mb-3">
-                                            <div className="bg-light p-3 rounded">
-                                                <p><strong>OFW Name:</strong> {selectedChat.ofw_name}</p>
-                                                <p><strong>City:</strong> {selectedChat.city}</p>
-                                                <p><strong>Address:</strong> {selectedChat.address}</p>
-                                                <p><strong>Coordinates:</strong> {selectedChat.latitude}, {selectedChat.longitude}</p>
-                                                <p><strong>Submitted At:</strong> {new Date(selectedChat.created_at).toLocaleString()}</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {activeTab === "normal" && selectedChat && selectedChat && (
-                                        <div className="mb-3">
-                                            <div className="bg-light p-3 rounded">
-                                                <h6 className="fw-bold">Complaint Details</h6>
-
-                                                <p><strong>Agency:</strong> {selectedChat.agency}</p>
-                                                <p><strong>OFW Name:</strong> {selectedChat.ofw_name}</p>
-                                                <p><strong>Gender:</strong> {selectedChat.gender}</p>
-                                                <p><strong>Birthdate:</strong> {selectedChat.birthdate}</p>
-                                                <p><strong>Occupation:</strong> {selectedChat.occupation}</p>
-                                                <p><strong>National ID:</strong> {selectedChat.national_id}</p>
-                                                <p><strong>Passport No:</strong> {selectedChat.passport_no}</p>
-                                                <p><strong>Email:</strong> {selectedChat.email}</p>
-                                                <p><strong>Contact Person:</strong> {selectedChat.contact_person}</p>
-                                                <p><strong>Primary Contact:</strong> {selectedChat.primary_contact}</p>
-                                                <p><strong>Secondary Contact:</strong> {selectedChat.secondary_contact}</p>
-                                                <p><strong>Address Abroad:</strong> {selectedChat.address_abroad}</p>
-                                                <p><strong>Complaint:</strong> {selectedChat.complaint_text}</p>
-
-                                                {selectedChat.images?.filter(Boolean).length > 0 && (
-                                                    <div className="mt-2">
-                                                        <strong>Images:</strong>
-                                                        <div className="d-flex gap-2 mt-1 flex-wrap">
-                                                            {selectedChat.images.filter(Boolean).map((img, idx) => (
+                                                    if (isImage) {
+                                                        return (
+                                                            <div key={i} style={{ marginTop: "5px" }}>
                                                                 <img
-                                                                    key={idx}
-                                                                    src={`http://127.0.0.1:8000/storage/${img}`}
-                                                                    alt={`complaint-${idx}`}
-                                                                    className="rounded"
-                                                                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                                                                    src={line}
+                                                                    alt="Complaint evidence"
+                                                                    style={{
+                                                                        maxWidth: "200px",
+                                                                        borderRadius: "8px",
+                                                                        cursor: "pointer"
+                                                                    }}
+                                                                    onClick={() => window.open(line, "_blank")}
                                                                 />
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                            </div>
+                                                        );
+                                                    }
 
-                                                <p className="mt-2">
-                                                    <strong>Submitted At:</strong> {new Date(selectedChat.created_at).toLocaleString()}
-                                                </p>
+                                                    return <div key={i}>{line}</div>;
+                                                })}
+                                                <div className="small text-muted mt-1">
+                                                    {new Date(msg.created_at).toLocaleTimeString()}
+                                                </div>
                                             </div>
                                         </div>
-                                    )}
+                                    ))}
 
-                                </div>
+                                    <div ref={bottomRef}></div>
+                                </>
                             ) : (
-                                <p className="text-muted">Choose a conversation to view messages.</p>
+                                <p className="text-muted">No messages yet.</p>
                             )}
                         </div>
 
-                        {/* Card Footer - only for appointments */}
-                        {selectedChat && activeTab === "appointments" && (
+                        {selectedChat && (
                             <div className="card-footer">
                                 <div className="input-group">
-                                    <input type="text" className="form-control" placeholder="Type a reply..." />
-                                    <button className="btn btn-primary">Send</button>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Type a reply..."
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") sendReply();
+                                        }}
+                                    />
+                                    <button className="btn btn-primary" onClick={sendReply}>
+                                        Send
+                                    </button>
                                 </div>
                             </div>
                         )}
-
                     </div>
                 </div>
-
             </div>
         </div>
     );

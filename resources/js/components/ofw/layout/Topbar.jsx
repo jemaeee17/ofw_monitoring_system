@@ -3,20 +3,55 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
 
+axios.defaults.withCredentials = true;
+
 export default function Topbar() {
     const navigate = useNavigate();
     const [openPanel, setOpenPanel] = useState(null);
     const [notifications, setNotifications] = useState([]);
+    const [user, setUser] = useState(null);
 
-    const user = JSON.parse(localStorage.getItem("ofw"));
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem("ofw"));
+        if (storedUser) {
+            setUser(storedUser);
+        }
+    }, []);
+
     useEffect(() => {
         if (!user) return;
 
-        axios.get(`/api/notifications/${user.id}`)
-            .then(res => {
-                setNotifications(res.data);
-            });
-    }, []);
+        const fetchNotifications = async () => {
+            const token = localStorage.getItem("ofw_token");
+
+            if (!token) return;
+
+            try {
+                const res = await axios.get("/api/notifications", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                const sortedNotifications = res.data.sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                );
+
+                setNotifications(sortedNotifications);
+            } catch (err) {
+                if (err.response && err.response.status === 401) {
+                    console.warn("Unauthorized: token may be invalid or expired");
+                    localStorage.removeItem("ofw");
+                    localStorage.removeItem("ofw_token");
+                    navigate("/ofw-login");
+                } else {
+                    console.error("Failed to fetch notifications:", err);
+                }
+            }
+        };
+
+        fetchNotifications();
+    }, [user, navigate]);
 
     const notifRef = useRef(null);
     useEffect(() => {
@@ -34,8 +69,14 @@ export default function Topbar() {
     }, []);
 
     const markAsRead = async (id) => {
+        const token = localStorage.getItem("ofw_token");
         try {
-            await axios.post(`/api/notifications/read/${id}`);
+
+            await axios.post(`/api/notifications/read/${id}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
             setNotifications(prev =>
                 prev.map(n =>
@@ -63,9 +104,12 @@ export default function Topbar() {
 
     const handleLogout = () => {
         localStorage.removeItem("ofw");
+        localStorage.removeItem("ofw_token");
+        localStorage.removeItem("ofw_active_page");
         navigate("/ofw-login");
     };
 
+    if (!user) return null;
     return (
         <div
             className="topbar d-flex justify-content-between align-items-center p-3 position-relative"

@@ -12,13 +12,27 @@ import '../../css/ofw.css';
 
 export default function Ofw() {
     const location = useLocation();
-    const [activePage, setActivePage] = useState("dashboard");
+    const [activePage, setActivePage] = useState(() => {
+        return localStorage.getItem("ofw_active_page") || "dashboard";
+    });
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        if (location.state?.activePage) {
-            setActivePage(location.state.activePage);
+        const token = localStorage.getItem("ofw_token");
+
+        if (!token) {
+            window.location.href = "/ofw-login";
         }
-    }, [location.state]);
+    }, []);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("ofw");
+        if (storedUser) setUser(JSON.parse(storedUser));
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("ofw_active_page", activePage);
+    }, [activePage]);
 
     const renderPage = () => {
         switch (activePage) {

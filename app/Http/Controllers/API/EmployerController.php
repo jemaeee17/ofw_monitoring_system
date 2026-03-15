@@ -24,6 +24,8 @@ class EmployerController extends Controller
             'poc_contact_number' => 'nullable|string',
         ]);
 
+        $validated['agency_id'] = auth()->id();
+
         $employer = Employer::create($validated);
 
         return response()->json([
@@ -34,7 +36,12 @@ class EmployerController extends Controller
 
     public function index()
     {
-        $employers = Employer::withCount('assignedApplicants')->latest()->get();
+        $agencyId = auth()->id();
+
+        $employers = Employer::withCount('assignedApplicants')
+            ->where('agency_id', $agencyId)
+            ->latest()
+            ->get();
 
         return response()->json($employers);
     }

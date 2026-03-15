@@ -13,7 +13,11 @@ class ApplicantDetailsController extends Controller
 {
     public function store(Request $request, $applicationId)
     {
-        $application = Application::findOrFail($applicationId);
+        $agencyId = $request->user()->id;
+
+        $application = Application::where('id', $applicationId)
+            ->where('agency_id', $agencyId)
+            ->firstOrFail();
 
         if ($request->has('documents')) {
             foreach ($request->documents as $index => $doc) {
@@ -23,10 +27,19 @@ class ApplicantDetailsController extends Controller
                     $filePath = $file->store('documents', 'public');
                     $originalName = $file->getClientOriginalName();
 
+                    $document = ApplicantDocument::where([
+                        'application_id' => $application->id,
+                        'type' => $doc['type'] ?? null,
+                    ])->first();
+
+                    if ($document && $document->file_path) {
+                        Storage::disk('public')->delete($document->file_path);
+                    }
+
                     ApplicantDocument::updateOrCreate(
                         [
                             'application_id' => $application->id,
-                            'type' => $doc['type'] ?? null, 
+                            'type' => $doc['type'] ?? null,
                         ],
                         [
                             'file_path' => $filePath,
@@ -41,6 +54,7 @@ class ApplicantDetailsController extends Controller
             foreach ($request->flights as $index => $flight) {
                 $file = $request->file("flights.$index.file");
                 $filePath = null;
+                $originalName = null;
 
                 if ($file) {
                     $filePath = $file->store('flights', 'public');
@@ -54,7 +68,7 @@ class ApplicantDetailsController extends Controller
                     ],
                     [
                         'file_path' => $filePath,
-                        'file_name' => $originalName ?? null,
+                        'file_name' => $originalName,
                         'contact_name' => $flight['contactName'] ?? null,
                         'contact_number' => $flight['contactNumber'] ?? null,
                     ]
@@ -67,9 +81,15 @@ class ApplicantDetailsController extends Controller
         ]);
     }
 
-    public function show($applicationId)
+    public function show(Request $request, $applicationId)
     {
-        $application = Application::with(['documents', 'flights'])->findOrFail($applicationId);
+        $agencyId = $request->user()->id;
+
+        $application = Application::with(['documents', 'flights'])
+            ->where('id', $applicationId)
+            ->where('agency_id', $agencyId)
+            ->firstOrFail();
+
         return response()->json($application);
     }
 }

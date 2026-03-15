@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ApplicantEmployerAssignment;
 
 class Application extends Model
 {
@@ -37,6 +38,8 @@ class Application extends Model
         'skills',
         'objective',
         'photo',
+        'agency_id',
+        'user_id',
     ];
 
     public function documents()
@@ -47,5 +50,20 @@ class Application extends Model
     public function flights()
     {
         return $this->hasMany(ApplicantFlight::class, 'application_id');
+    }
+
+    public function agency()
+    {
+        return $this->belongsTo(User::class, 'agency_id');
+    }
+
+    public function employer()
+    {
+        return $this->belongsTo(Employer::class);
+    }
+
+    public function assignment()
+    {
+        return $this->hasOne(ApplicantEmployerAssignment::class, 'applicant_id');
     }
 }

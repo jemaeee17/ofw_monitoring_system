@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const ApplicationFormModal = ({ showForm, closeAndReset, onApplicationSaved }) => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [formStep, setFormStep] = useState(1);
 
     const initialFormData = {
@@ -61,17 +62,28 @@ const ApplicationFormModal = ({ showForm, closeAndReset, onApplicationSaved }) =
         e.preventDefault();
 
         const submitData = new FormData();
-        for (let key in formData) {
-            submitData.append(key, formData[key]);
-        }
+        Object.entries(formData).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+                submitData.append(key, value);
+            }
+        });
+
+        const token = localStorage.getItem("token");
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/applications', {
                 method: 'POST',
-                body: submitData,
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json"
+                },
+                body: submitData
             });
 
-            if (!response.ok) throw new Error('Submission failed');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Submission failed');
+            }
 
             await response.json();
 

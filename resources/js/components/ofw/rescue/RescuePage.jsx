@@ -28,9 +28,16 @@ export default function RescuePage({ setActivePage }) {
 
                 try {
                     const response = await axios.get(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        "https://nominatim.openstreetmap.org/reverse",
+                        {
+                            params: {
+                                format: "json",
+                                lat: latitude,
+                                lon: longitude
+                            },
+                            withCredentials: false
+                        }
                     );
-
                     const data = response.data;
 
                     const city =

@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import ofwApi from "../../../services/ofwApi";
 
 export default function ComplaintForm({ onBack }) {
     const [coHosts, setCoHosts] = useState([]);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/api/co-hosts")
-            .then(res => setCoHosts(res.data))
+        ofwApi.get("public/co-hosts")
+            .then(res => {
+                setCoHosts(res.data);
+            })
             .catch(err => console.error(err));
     }, []);
 
+    const ofw = JSON.parse(localStorage.getItem("ofw"));
+
     const [form, setForm] = useState({
-        agency: "",
-        ofw_name: "",
-        gender: "",
-        birthdate: "",
-        occupation: "",
-        national_id: "",
-        passport_no: "",
-        email: "",
+        co_host_id: "",
+        ofw_name: ofw?.name || "",
+        gender: ofw?.gender || "",
+        birthdate: ofw?.birthdate || "",
+        occupation: ofw?.occupation || "",
+        national_id: ofw?.national_id || "",
+        passport_no: ofw?.passport_no || "",
+        email: ofw?.email || "",
         contact_person: "",
-        primary_contact: "",
+        primary_contact: ofw?.contact || "",
         secondary_contact: "",
         address_abroad: "",
         complaint: "",
@@ -42,21 +46,34 @@ export default function ComplaintForm({ onBack }) {
 
         const formData = new FormData();
 
-        Object.keys(form).forEach(key => {
-            formData.append(key, form[key]);
-        });
+        const ofw = JSON.parse(localStorage.getItem("ofw"));
+
+        formData.append("ofw_id", ofw.id);
+        formData.append("co_host_id", form.co_host_id);
+
+        formData.append("ofw_name", form.ofw_name);
+        formData.append("gender", form.gender);
+        formData.append("birthdate", form.birthdate);
+        formData.append("occupation", form.occupation);
+        formData.append("national_id", form.national_id);
+        formData.append("passport_no", form.passport_no);
+        formData.append("email", form.email);
+        formData.append("contact_person", form.contact_person);
+        formData.append("primary_contact", form.primary_contact);
+        formData.append("secondary_contact", form.secondary_contact);
+        formData.append("address_abroad", form.address_abroad);
+        formData.append("complaint", form.complaint);
 
         if (image1) formData.append("image1", image1);
         if (image2) formData.append("image2", image2);
         if (image3) formData.append("image3", image3);
 
         try {
-            await axios.post("http://127.0.0.1:8000/api/complaints", formData);
 
-            setShowSuccessModal(true);
+            await ofwApi.post("complaints", formData);
 
             setForm({
-                agency: "",
+                co_host_id: "",
                 ofw_name: "",
                 gender: "",
                 birthdate: "",
@@ -70,12 +87,15 @@ export default function ComplaintForm({ onBack }) {
                 address_abroad: "",
                 complaint: "",
             });
+
             setImage1(null);
             setImage2(null);
             setImage3(null);
 
+            setShowSuccessModal(true);
+
         } catch (error) {
-            console.error(error);
+            console.error("Complaint error:", error.response?.data);
         }
     };
 
@@ -91,8 +111,8 @@ export default function ComplaintForm({ onBack }) {
                         <label className="form-label">Foreign Recruitment Agency</label>
                         <select
                             className="form-select"
-                            name="agency"
-                            value={form.agency}
+                            name="co_host_id"
+                            value={form.co_host_id}
                             onChange={handleChange}
                         >
                             <option value="">Select Agency</option>
@@ -272,22 +292,44 @@ export default function ComplaintForm({ onBack }) {
             </div>
 
             {showSuccessModal && (
-                <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header bg-success text-white">
-                                <h5 className="modal-title">Success!</h5>
-                                <button type="button" className="btn-close" onClick={() => setShowSuccessModal(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Your complaint has been submitted successfully.</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-success" onClick={() => setShowSuccessModal(false)}>OK</button>
+                <>
+                    <div className="modal fade show d-block" tabIndex="-1">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content border-0 shadow-lg rounded-4">
+
+                                <div className="modal-body text-center p-5">
+
+                                    <div className="mb-3">
+                                        <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "4rem" }}></i>
+                                    </div>
+
+                                    <h4 className="fw-bold text-success">
+                                        Complaint Submitted!
+                                    </h4>
+
+                                    <p className="text-muted mt-2">
+                                        Your complaint has been successfully submitted. Our agency will review it shortly.
+                                    </p>
+
+                                    <div className="d-flex justify-content-center gap-3 mt-4">
+                                        <button
+                                            className="btn btn-success px-4"
+                                            onClick={() => {
+                                                setShowSuccessModal(false);
+                                            }}
+                                        >
+                                            OK
+                                        </button>
+                                    </div>
+
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                </div>
+
+                    <div className="modal-backdrop fade show"></div>
+                </>
             )}
         </div>
     );

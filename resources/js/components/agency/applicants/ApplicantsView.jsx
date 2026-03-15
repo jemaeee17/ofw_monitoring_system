@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import ApplicantsTable from "./ApplicantsTable";
 import ApplicationFormModal from "./ApplicationFormModal";
 import AssignEmployerModal from "./AssignEmployerModal";
 import DownloadModal from "./DownloadModal";
 import ApplicantDetailsModal from "./ApplicantDetailsModal";
+
+axios.defaults.baseURL = "http://127.0.0.1:8000";
+axios.defaults.withCredentials = true;
 
 const ApplicantsView = () => {
     const [employers, setEmployers] = useState([]);
@@ -17,19 +21,15 @@ const ApplicantsView = () => {
     const [loadingApplicants, setLoadingApplicants] = useState(false);
     const [applicantsData, setApplicantsData] = useState([]);
 
-    const user = JSON.parse(localStorage.getItem("user")); // Logged-in agency
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-    // Fetch applicants for this agency
     const fetchApplicants = async () => {
         setLoadingApplicants(true);
         try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/api/applications?status=Applicant&agency_id=${user.id}`
-            );
-            if (!response.ok) throw new Error("Failed to fetch applicants");
+            const res = await axios.get("/api/applications?status=Applicant");
 
-            const result = await response.json();
-            const applicantsArray = Array.isArray(result) ? result : result.data;
+            const applicantsArray = Array.isArray(res.data) ? res.data : res.data.data;
 
             const formatted = applicantsArray.map((item) => ({
                 id: item.id,
@@ -40,7 +40,10 @@ const ApplicantsView = () => {
                 contact: item.contact_number ?? "-",
                 email: item.email ?? "N/A",
                 passport: item.passport_number ?? "-",
-                assignedEmployer: item.assignedEmployer ?? null,
+                assignedEmployer: item.assignedEmployer && item.assignedEmployer.employer_id
+                    ? item.assignedEmployer
+                    : null,
+                hasAssignedEmployer: item.assignedEmployer ? true : false,
             }));
 
             setApplicantsData(formatted);
@@ -70,9 +73,8 @@ const ApplicantsView = () => {
 
     const fetchEmployers = async () => {
         try {
-            const res = await fetch("http://127.0.0.1:8000/api/employers");
-            const data = await res.json();
-            setEmployers(data);
+            const res = await axios.get("/api/employers");
+            setEmployers(res.data);
         } catch (err) {
             console.error("Failed to fetch employers:", err);
         }
@@ -95,23 +97,26 @@ const ApplicantsView = () => {
 
     const handleAssign = async ({ applicantId, employerId, position, salary }) => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/assign-employer", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ applicant_id: applicantId, employer_id: employerId, job_title: position, salary }),
+            const res = await axios.post("/api/assign-employer", {
+                applicant_id: applicantId,
+                employer_id: employerId,
+                job_title: position,
+                salary: salary
             });
-            if (!response.ok) throw new Error("Failed to assign employer");
-            const result = await response.json();
 
             setApplicantsData(prev =>
                 prev.map(app =>
                     app.id === applicantId
-                        ? { ...app, assignedEmployer: { employerId, position, salary } }
+                        ? {
+                            ...app,
+                            assignedEmployer: { employer_id: employerId, position, salary },
+                            hasAssignedEmployer: true
+                        }
                         : app
                 )
             );
 
-            return result;
+            return res.data;
         } catch (err) {
             console.error(err);
             alert("Failed to assign employer. Please try again.");

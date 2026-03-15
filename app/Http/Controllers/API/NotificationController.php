@@ -5,12 +5,14 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Notification;
+use App\Models\UrgentComplaint;
+use App\Models\Complaint;
 
 class NotificationController extends Controller
 {
-    public function getNotifications($user_id)
+    public function getNotifications()
     {
-        return Notification::where('user_id', $user_id)
+        return Notification::where('user_id', auth()->id())
             ->latest()
             ->get();
     }
@@ -37,7 +39,10 @@ class NotificationController extends Controller
 
     public function agencyAppointmentMessages()
     {
+        $agencyId = auth()->id();
+
         $messages = Notification::where('type', 'agency_appointment')
+            ->where('agency_id', $agencyId)
             ->latest()
             ->get()
             ->map(function ($msg) {
@@ -54,21 +59,29 @@ class NotificationController extends Controller
 
     public function agencyUrgentMessages()
     {
+        $agencyId = auth()->id();
+
         $messages = Notification::where('type', 'urgent')
+            ->where('agency_id', $agencyId)
+            ->whereNull('user_id')
             ->latest()
             ->get();
-
         $messages->transform(function ($msg) {
-            if ($msg->type === 'urgent') {
-                $complaint = \App\Models\UrgentComplaint::where('ofw_name', str_replace('🚨 Urgent complaint submitted by ', '', $msg->message))->first();
-                if ($complaint) {
-                    $msg->ofw_name = $complaint->ofw_name;
-                    $msg->city = $complaint->city;
-                    $msg->address = $complaint->address;
-                    $msg->latitude = $complaint->latitude;
-                    $msg->longitude = $complaint->longitude;
-                }
+
+            $ofwName = str_replace('🚨 Urgent complaint submitted by ', '', $msg->message);
+
+            $complaint = UrgentComplaint::where('ofw_name', $ofwName)
+                ->latest()
+                ->first();
+
+            if ($complaint) {
+                $msg->ofw_name = $complaint->ofw_name;
+                $msg->city = $complaint->city;
+                $msg->address = $complaint->address;
+                $msg->latitude = $complaint->latitude;
+                $msg->longitude = $complaint->longitude;
             }
+
             return $msg;
         });
 
@@ -77,19 +90,25 @@ class NotificationController extends Controller
 
     public function agencyNormalMessages()
     {
+        $agencyId = auth()->id();
+
         $messages = Notification::where('type', 'complaint')
+            ->where('agency_id', $agencyId)
+            ->whereNull('user_id')
             ->latest()
             ->get();
 
         $messages->transform(function ($msg) {
             $complaint = null;
-            if ($msg->related_id) {
-                $complaint = \App\Models\Complaint::find($msg->related_id);
+            if ($msg->conversation_id) {
+                $complaint = Complaint::where('ofw_name', 'LIKE', '%' . $msg->message . '%')
+                    ->latest()
+                    ->first();
             }
 
             if (!$complaint) {
                 $ofwName = str_replace('New complaint submitted by ', '', $msg->message);
-                $complaint = \App\Models\Complaint::where('ofw_name', $ofwName)
+                $complaint = Complaint::where('ofw_name', $ofwName)
                     ->latest()
                     ->first();
             }
@@ -123,5 +142,15 @@ class NotificationController extends Controller
         });
 
         return response()->json($messages);
+    }
+
+    public function createAgencyNotification($message, $type = 'agency_appointment', $agencyId = null)
+    {
+        return Notification::create([
+            'type' => $type,
+            'message' => $message,
+            'is_read' => false,
+            'agency_id' => $agencyId,
+        ]);
     }
 }

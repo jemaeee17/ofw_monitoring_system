@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import CoHostTable from './CoHostTable';
 import CoHostModal from './CoHostModal';
 
+import api from '../../../services/api';
+
 const CoHostView = () => {
+    const token = localStorage.getItem('token');
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState('add');
     const [selectedAgency, setSelectedAgency] = useState(null);
-
     const [agencies, setAgencies] = useState([]);
+    
+    const fetchAgencies = async () => {
+        try {
+            const res = await axios.get('/api/co-hosts');
+            setAgencies(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     useEffect(() => {
-        fetch('/api/co-hosts')
-            .then(res => res.json())
-            .then(data => setAgencies(data))
-            .catch(err => console.error(err));
+        fetchAgencies();
     }, []);
 
     const handleAction = (type, agency = null) => {
@@ -29,26 +38,13 @@ const CoHostView = () => {
 
     const saveAgency = async (data) => {
         try {
-            let response;
-
             if (modalType === 'add') {
-                response = await fetch('/api/co-hosts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+                await axios.post('/api/co-hosts', data);
             } else {
-                response = await fetch(`/api/co-hosts/${selectedAgency.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+                await axios.put(`/api/co-hosts/${selectedAgency.id}`, data);
             }
 
-            await response.json();
-
-            const updatedAgencies = await fetch('/api/co-hosts').then(res => res.json());
-            setAgencies(updatedAgencies);
+            fetchAgencies();
         } catch (err) {
             console.error(err);
         }

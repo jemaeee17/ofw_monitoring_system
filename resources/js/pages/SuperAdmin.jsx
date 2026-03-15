@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Sidebar from "../components/superadmin/Sidebar";
 import AgenciesTab from "../components/superadmin/AgenciesTab";
 import DashboardHeader from "../components/superadmin/DashboardHeader";
@@ -17,6 +18,9 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend, CartesianGrid } from 'recharts';
 import "../../css/superadmin.css";
+
+axios.defaults.baseURL = "http://127.0.0.1:8000";
+axios.defaults.withCredentials = true;
 
 export default function SuperAdmin() {
     const [activePage, setActivePage] = useState("dashboard");
@@ -46,59 +50,57 @@ export default function SuperAdmin() {
 
     const [activities, setActivities] = useState([]);
 
+    const token = localStorage.getItem("token");
+
     useEffect(() => {
-        fetch("/api/complaints/today-normal")
-            .then(res => res.json())
-            .then(data => setTodayNormalComplaints(data.todayNormalComplaints))
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+    }, [token]);
+
+    useEffect(() => {
+        axios.get("/api/complaints/today-normal")
+            .then(res => setTodayNormalComplaints(res.data.todayNormalComplaints))
             .catch(err => console.error(err));
 
-        fetch("/api/complaints/today-urgent")
-            .then(res => res.json())
-            .then(data => setTodayUrgentComplaints(data.todayUrgentComplaints))
+        axios.get("/api/complaints/today-urgent")
+            .then(res => setTodayUrgentComplaints(res.data.todayUrgentComplaints))
             .catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
-        fetch("/api/complaints/monthly-normal")
-            .then(res => res.json())
-            .then(data => setMonthlyComplaints(data.monthlyNormalComplaints))
+        axios.get("/api/complaints/monthly-normal")
+            .then(res => setMonthlyComplaints(res.data.monthlyNormalComplaints))
             .catch(err => console.error(err));
 
-        fetch("/api/complaints/monthly-urgent")
-            .then(res => res.json())
-            .then(data => setMonthlyUrgentComplaints(data.monthlyUrgentComplaints))
+        axios.get("/api/complaints/monthly-urgent")
+            .then(res => setMonthlyUrgentComplaints(res.data.monthlyUrgentComplaints))
             .catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
-        fetch("/api/total-agencies")
-            .then((res) => res.json())
-            .then((data) => {
-                setTotalAgencies(data.totalAgencies);
-            })
-            .catch((err) => console.error(err))
+        axios.get("/api/total-agencies")
+            .then(res => setTotalAgencies(res.data.totalAgencies))
+            .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, []);
 
     useEffect(() => {
-        fetch("/api/active-agencies")
-            .then((res) => res.json())
-            .then((data) => setActiveAgencies(data.activeAgencies))
-            .catch((err) => console.error(err));
+        axios.get("/api/active-agencies")
+            .then(res => setActiveAgencies(res.data.activeAgencies))
+            .catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
-        fetch("/api/total-ofws")
-            .then((res) => res.json())
-            .then((data) => setTotalOfws(data.totalOfws))
-            .catch((err) => console.error(err));
+        axios.get("/api/total-ofws")
+            .then(res => setTotalOfws(res.data.totalOfws))
+            .catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
-        fetch("/api/blocked-agencies")
-            .then((res) => res.json())
-            .then((data) => setBlockedAgencies(data.blockedAgencies))
-            .catch((err) => console.error(err));
+        axios.get("/api/blocked-agencies")
+            .then(res => setBlockedAgencies(res.data.blockedAgencies))
+            .catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
@@ -115,31 +117,34 @@ export default function SuperAdmin() {
     }, []);
 
     const refreshAgencyStats = () => {
-        fetch("/api/total-agencies")
-            .then(res => res.json())
-            .then(data => setTotalAgencies(data.totalAgencies))
-            .catch(err => console.error(err));
+        axios.get("/api/total-agencies")
+            .then(res => setTotalAgencies(res.data.totalAgencies));
 
-        fetch("/api/active-agencies")
-            .then(res => res.json())
-            .then(data => setActiveAgencies(data.activeAgencies))
-            .catch(err => console.error(err));
+        axios.get("/api/active-agencies")
+            .then(res => setActiveAgencies(res.data.activeAgencies));
 
-        fetch("/api/blocked-agencies")
-            .then(res => res.json())
-            .then(data => setBlockedAgencies(data.blockedAgencies))
-            .catch(err => console.error(err));
+        axios.get("/api/blocked-agencies")
+            .then(res => setBlockedAgencies(res.data.blockedAgencies));
     };
 
     const fetchNotifications = () => {
         Promise.all([
-            fetch("/api/complaints").then(res => res.json()),
-            fetch("/api/complaints/urgent").then(res => res.json())
+            axios.get("/api/complaints"),
+            axios.get("/api/complaints/urgent")
         ])
             .then(([normal, urgent]) => {
+
                 const combined = [
-                    ...normal.data.map(c => ({ id: c.id, message: `Normal complaint: ${c.ofw_name}`, created_at: c.created_at })),
-                    ...urgent.data.map(u => ({ id: u.id, message: `Urgent complaint: ${u.ofw_name}`, created_at: u.created_at }))
+                    ...normal.data.data.map(c => ({
+                        id: c.id,
+                        message: `Normal complaint: ${c.ofw_name}`,
+                        created_at: c.created_at
+                    })),
+                    ...urgent.data.data.map(u => ({
+                        id: u.id,
+                        message: `Urgent complaint: ${u.ofw_name}`,
+                        created_at: u.created_at
+                    }))
                 ];
 
                 const latestFour = combined
@@ -153,12 +158,12 @@ export default function SuperAdmin() {
     };
 
     const fetchActivities = () => {
-        fetch("/api/activities")
-            .then(res => res.json())
-            .then(data => {
-                const latestFour = data
+        axios.get("/api/activities")
+            .then(res => {
+                const latestFour = res.data
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .slice(0, 4);
+
                 setActivities(latestFour);
             })
             .catch(err => console.error("Error fetching activities:", err));

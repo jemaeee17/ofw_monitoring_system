@@ -19,6 +19,7 @@ class UrgentComplaint extends Model
         'city',
         'address',
         'status',
+        'agency_id',
     ];
 
     public function coHost()

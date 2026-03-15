@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Appointment extends Model
 {
@@ -20,5 +21,11 @@ class Appointment extends Model
         'business_type',
         'schedule_date',
         'schedule_time',
+        'agency_id',
     ];
+
+    public function agency()
+    {
+        return $this->belongsTo(User::class, 'agency_id');
+    }
 }

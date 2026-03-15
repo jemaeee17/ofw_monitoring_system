@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+import api from '../services/api';
+
 export default function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -17,18 +19,17 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const response = await axios.post(
-                'http://127.0.0.1:8000/api/agency/login',
-                { email, password }
-            );
+            const response = await api.post('agency/login', { email, password });
 
-            localStorage.setItem('user', JSON.stringify(response.data.user));
+            const token = response.data.token;
+            const user = response.data.user;
+
+            localStorage.setItem('agency_token', token);
+            localStorage.setItem('agency_user', JSON.stringify(user));
+
             setShowSuccessModal(true);
-
         } catch (err) {
-            setErrorMessage(
-                err.response?.data?.message || 'Invalid email or password.'
-            );
+            setErrorMessage(err.response?.data?.message || 'Invalid email or password.');
             setShowErrorModal(true);
         } finally {
             setLoading(false);

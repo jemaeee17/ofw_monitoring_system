@@ -27,6 +27,7 @@ class Complaint extends Model
         'image2',
         'image3',
         'status',
+        'agency_id',
     ];
 
     public function coHost()

@@ -11,6 +11,7 @@ class Employer extends Model
     use HasFactory;
 
     protected $fillable = [
+        'agency_id',
         'company_name',
         'business_type',
         'industry_sector',
@@ -26,5 +27,10 @@ class Employer extends Model
     public function assignedApplicants()
     {
         return $this->hasMany(ApplicantEmployerAssignment::class, 'employer_id');
+    }
+
+    public function agency()
+    {
+        return $this->belongsTo(User::class);
     }
 }

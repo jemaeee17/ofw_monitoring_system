@@ -21,6 +21,8 @@ export default function ComplaintsMessages() {
     const [archivedUrgent, setArchivedUrgent] = useState([]);
     const [expandedDays, setExpandedDays] = useState({});
 
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
     const fetchArchivedComplaints = async () => {
         try {
             const normalRes = await axios.get("http://127.0.0.1:8000/api/complaints/archived");
@@ -43,7 +45,6 @@ export default function ComplaintsMessages() {
             try {
                 setLoading(true);
 
-                // NORMAL COMPLAINTS
                 const normalRes = await axios.get(
                     "http://127.0.0.1:8000/api/complaints"
                 );
@@ -54,7 +55,6 @@ export default function ComplaintsMessages() {
 
                 setNormalComplaints(normalData);
 
-                // URGENT COMPLAINTS
                 const urgentRes = await axios.get(
                     "http://127.0.0.1:8000/api/complaints/urgent"
                 );
@@ -88,6 +88,8 @@ export default function ComplaintsMessages() {
     const handleViewDetails = async (complaint) => {
         try {
 
+            setShowArchiveModal(false);
+
             let res;
 
             if (activeTab === "urgent") {
@@ -118,6 +120,8 @@ export default function ComplaintsMessages() {
             }
 
             await fetchArchivedComplaints();
+
+            setShowSuccessModal(true);
 
         } catch (err) {
             console.error(err);
@@ -274,10 +278,6 @@ export default function ComplaintsMessages() {
                                                 Details
                                             </button>
 
-                                            <button className="btn btn-sm btn-success">
-                                                Reply
-                                            </button>
-
                                             <button
                                                 className="btn btn-sm btn-secondary"
                                                 onClick={() => markAsDone(complaint)}
@@ -379,6 +379,7 @@ export default function ComplaintsMessages() {
                                                     <th>#</th>
                                                     <th>OFW Name</th>
                                                     <th>Date Submitted</th>
+                                                    <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -387,6 +388,15 @@ export default function ComplaintsMessages() {
                                                         <td>{index + 1}</td>
                                                         <td>{c.ofw_name || c.name}</td>
                                                         <td>{new Date(c.created_at).toLocaleString()}</td>
+
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-sm btn-primary"
+                                                                onClick={() => handleViewDetails(c)}
+                                                            >
+                                                                Details
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -403,6 +413,48 @@ export default function ComplaintsMessages() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showSuccessModal && (
+                <>
+                    <div className="modal fade show d-block" tabIndex="-1">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content border-0 shadow-lg rounded-4">
+
+                                <div className="modal-body text-center p-5">
+
+                                    <div className="mb-3">
+                                        <i
+                                            className="bi bi-check-circle-fill text-success"
+                                            style={{ fontSize: "4rem" }}
+                                        ></i>
+                                    </div>
+
+                                    <h4 className="fw-bold text-success">
+                                        Complaint Archived!
+                                    </h4>
+
+                                    <p className="text-muted mt-2">
+                                        The complaint has been successfully sent to the archive.
+                                    </p>
+
+                                    <div className="d-flex justify-content-center gap-3 mt-4">
+                                        <button
+                                            className="btn btn-success px-4"
+                                            onClick={() => setShowSuccessModal(false)}
+                                        >
+                                            OK
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="modal-backdrop fade show"></div>
+                </>
             )}
         </div>
     );

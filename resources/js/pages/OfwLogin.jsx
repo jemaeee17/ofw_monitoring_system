@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+import ofwApi from "../services/ofwApi";
+
 export default function OfwLogin() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -19,10 +21,18 @@ export default function OfwLogin() {
         try {
             const response = await axios.post(
                 'http://127.0.0.1:8000/api/ofw/login',
-                { email, password }
+                { email, password },
+                { withCredentials: true }
             );
 
-            localStorage.setItem('ofw', JSON.stringify(response.data.user));
+            const { user, token } = response.data;
+
+            localStorage.setItem('ofw', JSON.stringify(user));
+            localStorage.setItem('ofw_token', token);
+
+            localStorage.setItem("ofw_active_page", "dashboard");
+
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
             setShowSuccessModal(true);
 

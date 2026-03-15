@@ -5,35 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const Step2Schedule = ({ formData, setFormData, phBlue }) => {
     const [fullyBookedDates, setFullyBookedDates] = useState([]);
-
-    useEffect(() => {
-        axios
-            .get("/api/appointments/fully-booked")
-            .then((res) => {
-                const dates = res.data.map((item) => new Date(item.schedule_date));
-                setFullyBookedDates(dates);
-            })
-            .catch((err) => console.error(err));
-    }, []);
-
-    const handleDateChange = (date) => {
-        const formattedDate = date.toISOString().split("T")[0];
-
-        setFormData({
-            ...formData,
-            schedule_date: formattedDate,
-            schedule_time: ""
-        });
-
-        axios
-            .get(`/api/appointments/booked-times/${formattedDate}`)
-            .then((res) => {
-                setBookedTimes(res.data);
-            })
-            .catch((err) => console.error(err));
-    };
-
     const [bookedTimes, setBookedTimes] = useState([]);
+    const [loadingTimes, setLoadingTimes] = useState(false);
 
     const allTimes = [
         "08:00 AM - 09:00 AM",
@@ -46,24 +19,56 @@ const Step2Schedule = ({ formData, setFormData, phBlue }) => {
         "04:00 PM - 05:00 PM",
     ];
 
-    const availableTimes = allTimes.filter(
-        (time) => !bookedTimes.includes(time)
-    );
-
     const isSunday = (date) => date.getDay() === 0;
 
-    const handleTimeSelect = (time) => {
-        setFormData({
-            ...formData,
-            schedule_time: time
-        });
+    useEffect(() => {
+        if (!formData.agency_id) return;
+
+        axios
+            .get("/api/appointments/fully-booked", {
+                params: { agency_id: formData.agency_id },
+            })
+            .then((res) => {
+                const dates = res.data.map((item) => new Date(item.schedule_date));
+                setFullyBookedDates(dates);
+            })
+            .catch((err) => console.error(err));
+    }, [formData.agency_id]);
+
+    const fetchBookedTimes = (date) => {
+        if (!formData.agency_id || !date) return;
+        setLoadingTimes(true);
+
+        axios
+            .get(`/api/appointments/booked-times/${date}`, {
+                params: { agency_id: formData.agency_id },
+            })
+            .then((res) => {
+                setBookedTimes(res.data);
+                setLoadingTimes(false);
+            })
+            .catch((err) => {
+                console.error(err);
+                setLoadingTimes(false);
+            });
     };
 
-    const isFullyBooked = availableTimes.length === 0 && formData.schedule_date;
+    const handleDateChange = (date) => {
+        const formattedDate = date.toISOString().split("T")[0];
+
+        setFormData({
+            ...formData,
+            schedule_date: formattedDate,
+            schedule_time: "", 
+        });
+
+        fetchBookedTimes(formattedDate);
+    };
+
+    const availableTimes = allTimes.filter((time) => !bookedTimes.includes(time));
 
     return (
         <div className="animate-fade-in">
-
             <div className="col-12 mb-4">
                 <h5 className="fw-bold" style={{ color: phBlue }}>
                     Step 2: Choose Available Schedule
@@ -74,7 +79,6 @@ const Step2Schedule = ({ formData, setFormData, phBlue }) => {
             </div>
 
             <div className="row g-4">
-
                 {/* LEFT: Calendar */}
                 <div className="col-md-4">
                     <label className="fw-bold mb-2">Preferred Appointment Date</label>
@@ -97,7 +101,11 @@ const Step2Schedule = ({ formData, setFormData, phBlue }) => {
                 <div className="col-md-4">
                     <label className="fw-bold mb-2">Preferred Time</label>
                     <div className="p-3 border rounded shadow-sm bg-white">
-                        {formData.schedule_date ? (
+                        {!formData.schedule_date && <small className="text-muted">Select a date first.</small>}
+
+                        {formData.schedule_date && loadingTimes && <small>Loading available times...</small>}
+
+                        {formData.schedule_date && !loadingTimes && (
                             availableTimes.length > 0 ? (
                                 availableTimes.map((time) => (
                                     <div key={time} className="form-check mb-2">
@@ -107,9 +115,7 @@ const Step2Schedule = ({ formData, setFormData, phBlue }) => {
                                             name="schedule_time"
                                             value={time}
                                             checked={formData.schedule_time === time}
-                                            onChange={() =>
-                                                setFormData({ ...formData, schedule_time: time })
-                                            }
+                                            onChange={() => setFormData({ ...formData, schedule_time: time })}
                                         />
                                         <label className="form-check-label">{time}</label>
                                     </div>
@@ -119,8 +125,6 @@ const Step2Schedule = ({ formData, setFormData, phBlue }) => {
                                     No available time slots for this date.
                                 </div>
                             )
-                        ) : (
-                            <small className="text-muted">Select a date first.</small>
                         )}
                     </div>
                 </div>
@@ -141,9 +145,7 @@ const Step2Schedule = ({ formData, setFormData, phBlue }) => {
                         )}
                     </div>
                 </div>
-
             </div>
-
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import EmployersTable from './EmployersTable';
 import EmployerFormModal from './EmployerFormModal';
 
@@ -17,11 +18,10 @@ const EmployersView = () => {
 
     const fetchEmployers = async () => {
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/employers');
-            const data = await res.json();
-            setEmployers(data);
+            const res = await axios.get('/api/employers');
+            setEmployers(res.data);
         } catch (error) {
-            console.error("Failed to fetch employers:", error);
+            console.error('Failed to fetch employers:', error.response?.data || error.message);
         }
     };
 

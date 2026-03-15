@@ -15,7 +15,7 @@ const EmployedView = () => {
 
     const fetchWorkers = () => {
         setLoading(true);
-        axios.get('/api/employed')
+        axios.get('/api/employed', { withCredentials: true })
             .then(res => {
                 setAllWorkers(res.data);
                 setWorkers(res.data.filter(w => w.status === 'Employed'));
@@ -37,7 +37,7 @@ const EmployedView = () => {
 
     const handleOpenWorker = async (worker) => {
         try {
-            const res = await axios.get(`/api/applications/${worker.id}`);
+            const res = await axios.get(`/api/applications/${worker.id}`, { withCredentials: true });
             const application = res.data;
 
             setSelectedWorker({
@@ -72,7 +72,7 @@ const EmployedView = () => {
             {selectedWorker && (
                 <EmployedModal
                     selectedWorker={selectedWorker}
-                    workerDocuments={selectedWorker.documents} 
+                    workerDocuments={selectedWorker.documents}
                     workerFlights={selectedWorker.flights}
                     onClose={() => setSelectedWorker(null)}
                 />

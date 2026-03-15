@@ -7,25 +7,91 @@ use Illuminate\Http\Request;
 use App\Models\UrgentComplaint;
 use Carbon\Carbon;
 use App\Models\Notification;
+use App\Models\Appointment;
+use App\Models\User;
+use App\Models\Message;
 
 class UrgentComplaintController extends Controller
 {
+
     public function store(Request $request)
     {
+        $request->validate([
+            'ofw_id' => 'required|integer',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'city' => 'nullable|string',
+            'address' => 'nullable|string'
+        ]);
+
+        $ofw = User::find($request->ofw_id);
+
+        if (!$ofw) {
+            return response()->json([
+                'message' => 'OFW not found.'
+            ], 404);
+        }
+
+        $agencyId = $ofw->agency_id;
+
+        if (!$agencyId) {
+            return response()->json([
+                'message' => 'OFW is not assigned to an agency.'
+            ], 400);
+        }
+
         $urgentComplaint = UrgentComplaint::create([
-            'co_host_id' => $request->co_host_id,
+            'ofw_id' => $ofw->id,
             'ofw_name' => $request->ofw_name,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'city' => $request->city,
             'address' => $request->address,
+            'agency_id' => $agencyId,
+            'status' => 'pending'
         ]);
 
-        Notification::create([
+        $agencyNotification = Notification::create([
             'user_id' => null,
+            'agency_id' => $agencyId,
             'type' => 'urgent',
             'message' => '🚨 Urgent complaint submitted by ' . $urgentComplaint->ofw_name,
             'is_read' => false
+        ]);
+
+        $conversationId = $agencyNotification->id;
+
+        $agencyNotification->conversation_id = $conversationId;
+        $agencyNotification->save();
+
+        $urgentComplaint->conversation_id = $conversationId;
+        $urgentComplaint->save();
+
+        Notification::create([
+            'user_id' => $ofw->id,
+            'agency_id' => $agencyId,
+            'type' => 'urgent',
+            'message' => 'Your urgent complaint has been received. Our agency will respond shortly.',
+            'conversation_id' => $conversationId,
+            'is_read' => false
+        ]);
+
+        $rescueMessage =
+            "🚨 URGENT HELP REQUEST\n\n" .
+            "Name: {$urgentComplaint->ofw_name}\n" .
+            "City: {$urgentComplaint->city}\n" .
+            "Address: {$urgentComplaint->address}\n\n" .
+            "Latitude: {$urgentComplaint->latitude}\n" .
+            "Longitude: {$urgentComplaint->longitude}\n\n" .
+            "Google Maps:\n" .
+            "https://maps.google.com/?q={$urgentComplaint->latitude},{$urgentComplaint->longitude}";
+
+        Message::create([
+            'conversation_id' => $conversationId,
+            'agency_id' => $agencyId,
+            'ofw_id' => $ofw->id,
+            'sender' => 'ofw',
+            'message' => $rescueMessage,
         ]);
 
         return response()->json([

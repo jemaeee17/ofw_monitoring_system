@@ -68,12 +68,12 @@ const ApplicantsTable = ({
                                             <div className="d-flex justify-content-center gap-1">
                                                 <button
                                                     className="btn action-btn-ph"
-                                                    title={item.assignedEmployer ? "Employer already assigned" : "Assign Employer"}
+                                                    title={item.hasAssignedEmployer ? "Employer already assigned" : "Assign Employer"}
                                                     onClick={() => handleOpenAssign(item)}
-                                                    disabled={!!item.assignedEmployer}
+                                                    disabled={item.hasAssignedEmployer}
                                                     style={{
-                                                        opacity: item.assignedEmployer ? 0.5 : 1,
-                                                        cursor: item.assignedEmployer ? "not-allowed" : "pointer"
+                                                        opacity: item.hasAssignedEmployer ? 0.5 : 1,
+                                                        cursor: item.hasAssignedEmployer ? "not-allowed" : "pointer"
                                                     }}
                                                 >
                                                     🤝

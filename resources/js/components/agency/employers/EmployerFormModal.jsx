@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 const EmployerFormModal = ({ show, onClose, phColors, onEmployerCreated }) => {
     const [showSuccessModal, setShowSuccessModal] = React.useState(false);
@@ -24,19 +25,14 @@ const EmployerFormModal = ({ show, onClose, phColors, onEmployerCreated }) => {
         e.preventDefault();
 
         try {
-            const payload = {
-                ...employerData
-            };
-
-            const response = await fetch('http://127.0.0.1:8000/api/employers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            const response = await axios.post('/api/employers', employerData, {
+                withCredentials: true,
+                headers: { "Content-Type": "application/json" },
             });
 
-            const data = await response.json();
+            const data = response.data;
+
             onEmployerCreated(data.employer);
-            if (!response.ok) throw new Error(data.message || 'Submission failed');
 
             setShowSuccessModal(true);
 
@@ -44,6 +40,7 @@ const EmployerFormModal = ({ show, onClose, phColors, onEmployerCreated }) => {
                 company_name: '',
                 business_type: '',
                 industry_sector: '',
+                position: '',
                 cr_number: '',
                 email: '',
                 website: '',
@@ -51,8 +48,9 @@ const EmployerFormModal = ({ show, onClose, phColors, onEmployerCreated }) => {
                 poc_name: '',
                 poc_contact_number: '',
             });
+
         } catch (err) {
-            alert("Error: " + err.message);
+            alert("Error: " + (err.response?.data?.message || err.message));
         }
     };
 

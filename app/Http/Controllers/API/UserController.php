@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Models\OfwProfile;
 
 class UserController extends Controller
 {
@@ -188,6 +189,55 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Settings updated successfully',
             'agency' => $agency
+        ]);
+    }
+
+    public function getAgenciesPublic()
+    {
+        $agencies = User::where('role', 'agency')
+            ->where('status', 'Active')
+            ->get(['id', 'name']);
+        return response()->json($agencies);
+    }
+
+    public function getOfwProfile(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email ?? '',
+            'phone' => $user->phone ?? '',
+            'birthdate' => $user->birthdate ?? '',
+            'gender' => $user->gender ?? '',
+            'photo' => $user->photo ?? null,
+        ]);
+    }
+
+    public function updateOfwProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'birthdate' => 'nullable|date',
+            'gender' => 'nullable|string|in:Male,Female,Other',
+        ]);
+
+        $user->update($request->only(['name', 'email', 'phone', 'birthdate', 'gender']));
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('users', 'public');
+            $user->photo = $path;
+            $user->save();
+        }
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'profile' => $user,
         ]);
     }
 }

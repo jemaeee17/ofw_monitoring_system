@@ -1,11 +1,45 @@
-import React from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Step1PersonalInfo = ({ formData, setFormData, phBlue, phRed, phYellow }) => {
+    const [agencies, setAgencies] = useState([]);
+
+    useEffect(() => {
+        const fetchAgencies = async () => {
+            try {
+                const res = await axios.get("/api/public/agencies");
+                setAgencies(res.data);
+            } catch (err) {
+                console.error("Failed to fetch agencies:", err);
+            }
+        };
+
+        fetchAgencies();
+    }, []);
+
     return (
         <div className="row g-3 animate-fade-in">
             <div className="col-12 mb-2">
                 <h5 className="fw-bold" style={{ color: phBlue }}>Step 1: Personal & Agency Information</h5>
                 <div style={{ height: '3px', width: '60px', backgroundColor: phRed }}></div>
+            </div>
+
+            <div className="col-md-6">
+                <label className="form-label small fw-bold text-secondary">Select Agency</label>
+                <select
+                    className="form-select border-0 bg-light py-2"
+                    value={formData.agency_id || ""}
+                    onChange={(e) => setFormData({ ...formData, agency_id: e.target.value })}
+                >
+                    <option value="" disabled>
+                        Select Agency
+                    </option>
+                    {agencies.map((agency) => (
+                        <option key={agency.id} value={agency.id}>
+                            {agency.name}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div className="col-md-6">

@@ -14,6 +14,7 @@ class ApplicantEmployerAssignment extends Model
         'employer_id',
         'job_title',
         'salary',
+        'agency_id',
     ];
 
     // Relationships
@@ -25,6 +26,11 @@ class ApplicantEmployerAssignment extends Model
     public function employer()
     {
         return $this->belongsTo(Employer::class, 'employer_id');
+    }
+
+    public function agency()
+    {
+        return $this->belongsTo(User::class, 'agency_id');
     }
 
 }

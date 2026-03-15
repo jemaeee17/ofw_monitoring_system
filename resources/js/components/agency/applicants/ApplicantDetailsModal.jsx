@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+axios.defaults.baseURL = "http://127.0.0.1:8000";
+axios.defaults.withCredentials = true;
+
 const ApplicantDetailsModal = ({ show, onClose, selectedApplicant, onSave }) => {
     const [activeTab, setActiveTab] = useState("Documents");
     const [currentDoc, setCurrentDoc] = useState({ type: "", file: null });
@@ -25,10 +28,15 @@ const ApplicantDetailsModal = ({ show, onClose, selectedApplicant, onSave }) => 
 
     useEffect(() => {
         if (show) {
-            fetch("/api/co-hosts")
-                .then(res => res.json())
-                .then(data => setCoHosts(data))
-                .catch(err => console.error("Failed to fetch co-hosts:", err));
+            const fetchCoHosts = async () => {
+                try {
+                    const res = await axios.get("/api/co-hosts");
+                    setCoHosts(res.data);
+                } catch (err) {
+                    console.error("Failed to fetch co-hosts:", err.response?.data || err.message);
+                }
+            };
+            fetchCoHosts();
         }
     }, [show]);
 
@@ -94,14 +102,14 @@ const ApplicantDetailsModal = ({ show, onClose, selectedApplicant, onSave }) => 
             const formData = new FormData();
 
             documents.forEach((doc, index) => {
-                if (doc.isNew && doc.file) {  
+                if (doc.isNew && doc.file) {
                     formData.append(`documents[${index}][type]`, doc.type);
                     formData.append(`documents[${index}][file]`, doc.file);
                 }
             });
 
             flights.forEach((flight, index) => {
-                if (flight.file) { 
+                if (flight.file) {
                     formData.append(`flights[${index}][agency]`, flight.agency);
                     formData.append(`flights[${index}][contactName]`, flight.contactName);
                     formData.append(`flights[${index}][contactNumber]`, flight.contactNumber);
@@ -109,10 +117,18 @@ const ApplicantDetailsModal = ({ show, onClose, selectedApplicant, onSave }) => 
                 }
             });
 
-            await fetch(`/api/applications/${selectedApplicant.id}/details`, {
-                method: "POST",
-                body: formData
-            });
+            const response = await axios.post(
+                `/api/applications/${selectedApplicant.id}/details`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            console.log("Save response:", response.data);
 
             if (deploymentComplete) {
                 setShowDeployConfirm(true);
@@ -126,11 +142,16 @@ const ApplicantDetailsModal = ({ show, onClose, selectedApplicant, onSave }) => 
     };
 
     const setEmployedStatus = async () => {
+        if (!selectedApplicant) return;
+
         try {
 
-            await fetch(`/api/applications/${selectedApplicant.id}/set-employed`, {
-                method: "POST"
-            });
+            const response = await axios.post(
+                `/api/applications/${selectedApplicant.id}/set-employed`,
+                {},
+                { withCredentials: true }
+            );
+            console.log("Employed response:", response.data);
 
             alert("Applicant is now employed.");
 

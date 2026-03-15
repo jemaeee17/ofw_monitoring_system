@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -26,8 +28,11 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $token = $user->createToken('agency-token')->plainTextToken;
+
         return response()->json([
             'message' => 'Agency login successful',
+            'token' => $token,
             'user' => $user
         ]);
     }
@@ -49,9 +54,17 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $token = $user->createToken('admin-token')->plainTextToken;
+
         return response()->json([
             'message' => 'Admin login successful',
-            'user' => $user
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role
+            ]
         ]);
     }
 
@@ -72,9 +85,21 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $token = $user->createToken('ofw-token')->plainTextToken;
+
         return response()->json([
             'message' => 'OFW login successful',
-            'user' => $user
+            'user' => $user,
+            'token' => $token
+        ]);
+    }
+
+    public function ofwLogout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
         ]);
     }
 }

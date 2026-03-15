@@ -6,6 +6,8 @@ import AppointmentsHeaderCards from "./AppointmentsHeaderCards";
 import AppointmentsTable from "./AppointmentsTable";
 import AppointmentsCalendar from "./AppointmentsCalendar";
 
+import api from '../../../services/api';
+
 export default function Appointments() {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);

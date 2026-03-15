@@ -1,37 +1,40 @@
 import React, { useEffect, useRef } from "react";
-import axios from "axios";
+import ofwApi from "../../../services/ofwApi";
 
 export default function UrgentPage({ userLocation, locationError, isLocating, onBack, user, selectedAgency }) {
     const hasSent = useRef(false);
 
     useEffect(() => {
 
-        if (userLocation && user && !hasSent.current) {
-            const sendUrgentComplaint = async () => {
-                try {
-                    const payload = {
-                        ofw_name: user.name,
-                        co_host_id: user.co_host_id,
-                        latitude: userLocation.lat,
-                        longitude: userLocation.lng,
-                        city: userLocation.city,
-                        address: userLocation.address
-                    };
-                    console.log("Sending urgent complaint:", payload);
+        if (!userLocation || !user || hasSent.current) return;
 
-                    await axios.post("http://127.0.0.1:8000/api/complaints/urgent", payload);
+        const sendUrgentComplaint = async () => {
+            try {
+                const payload = {
+                    ofw_id: user.id,
+                    ofw_name: user.name,
+                    latitude: userLocation.lat,
+                    longitude: userLocation.lng,
+                    city: userLocation.city,
+                    address: userLocation.address
+                };
 
-                    alert("Your urgent complaint has been sent to Super Admin!");
+                console.log("Sending urgent complaint:", payload);
 
-                    hasSent.current = true;
-                } catch (err) {
-                    console.error(err.response || err);
-                    alert("Failed to send urgent complaint.");
-                }
-            };
+                await ofwApi.post("complaints/urgent", payload);
 
-            sendUrgentComplaint();
-        }
+                alert("Your urgent complaint has been sent to Super Admin!");
+
+                hasSent.current = true;
+
+            } catch (err) {
+                console.error(err.response || err);
+                alert("Failed to send urgent complaint.");
+            }
+        };
+
+        sendUrgentComplaint();
+
     }, [userLocation, user]);
 
     const handleCopyLocation = () => {
