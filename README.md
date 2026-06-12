@@ -2,9 +2,9 @@
 
 ## Overview
 
-The OFW Monitoring System is a full-stack web application designed to support overseas Filipino workers (OFWs) and recruitment agencies by providing monitoring, communication, and assistance management tools.
+The OFW Monitoring System is a full-stack web application designed to support overseas Filipino workers (OFWs) and recruitment agencies through monitoring, communication, appointment management, and assistance services.
 
-## Features
+## Key Features
 
 * User Authentication and Authorization
 * Online Appointment Scheduling
@@ -39,12 +39,22 @@ The OFW Monitoring System is a full-stack web application designed to support ov
 
 ## My Contributions
 
-* Developed frontend interfaces using ReactJS and TypeScript
+* Developed responsive frontend interfaces using ReactJS and TypeScript
 * Built and integrated RESTful APIs using Laravel
-* Implemented appointment scheduling and notification features
+* Implemented appointment scheduling, notification, and tracking features
 * Optimized application performance and responsiveness
 * Performed testing, debugging, and maintenance
-* Collaborated using Git-based workflows
+* Collaborated using Git-based development workflows
+
+## Skills Demonstrated
+
+* Full-Stack Development
+* API Development & Integration
+* Database Management
+* Frontend Development
+* Backend Development
+* Debugging & Testing
+* Performance Optimization
 
 ## Purpose
 
