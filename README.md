@@ -19,7 +19,6 @@ The OFW Monitoring System is a full-stack web application designed to support ov
 ### Frontend
 
 * ReactJS
-* TypeScript
 * HTML5
 * CSS3
 
